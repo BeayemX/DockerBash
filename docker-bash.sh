@@ -1,10 +1,10 @@
 export DEFAULT_CONTAINER_NAME=docker-bash
-export DB_PATH=$HOME/DockerBash/
-export DB_ALIASES=$DB_PATH/bash_aliases.sh
-export DISTRO_IMAGES=(`ls ${DB_PATH}/distributions/`)
+export DOCKERBASH_PATH=$HOME/DockerBash/
+export DOCKERBASH_ALIASES=$DOCKERBASH_PATH/bash_aliases.sh
+export DISTRO_IMAGES=(`ls ${DOCKERBASH_PATH}/distributions/`)
 
 # Autocompletion
-source $DB_PATH/docker-bash-completion.bash
+source $DOCKERBASH_PATH/docker-bash-completion.bash
 
 # Usage
 alias db='_docker-bash-magic'
@@ -18,7 +18,7 @@ alias db-rebuild-image-from-scratch='_rebuild_from_scratch'
 alias db-rebuild-image='_select_distro && (db-cd && builtin cd distributions/$IMAGE_DISTRO && docker build --tag=$IMAGE_NAME . )'
 
 # Utilities
-alias db-cd='builtin cd $DB_PATH'
+alias db-cd='builtin cd $DOCKERBASH_PATH'
 alias db-list='_db_list'
 alias db-list-names-only='_docker-bash-list-container-names-only'
 
@@ -35,7 +35,7 @@ alias _db_run_template='docker run -it \
 	--name=$CONTAINER_NAME \
 	--net=host \
 	--volume=$HOME:/host \
-	--volume=$DB_ALIASES:/root/.bash_aliases \
+	--volume=$DOCKERBASH_ALIASES:/root/.bash_aliases \
 	--volume=$HOME/.inputrc:/root/.inputrc \
 	--volume=$HOME/.tmux.conf:/root/.tmux.conf \
 	--volume=$HOME/.vimrc:/root/.vimrc \
