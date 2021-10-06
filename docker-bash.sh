@@ -1,10 +1,10 @@
 export DEFAULT_CONTAINER_NAME=docker-bash
-export DB_PATH=$HOME/system-backup/Scripts/DockerBash/
-export DB_ALIASES=$HOME/system-backup/Scripts/DockerBash/bash_aliases.sh
+export DB_PATH=$HOME/DockerBash/
+export DB_ALIASES=$DB_PATH/bash_aliases.sh
 export DISTRO_IMAGES=(`ls ${DB_PATH}/distributions/`)
 
 # Autocompletion
-source ~/system-backup/Scripts/DockerBash/docker-bash-completion.bash
+source $DB_PATH/docker-bash-completion.bash
 
 # Usage
 alias db='_docker-bash-magic'
