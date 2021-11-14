@@ -134,9 +134,9 @@ function _db_list() {
 	do
 		local num_lines=$(docker container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | wc -l)
 		if [ $num_lines -gt 1 ]; then
-			echo "$IMAGE"
+			echo "      $IMAGE      "
 			#docker container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | awk 'NF>1{print $NF}' | tail -n +2
-			echo "  `docker container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | awk 'NF>1{print $NF}' | tail -n +2`"
+			echo "`docker container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | awk 'NF>1{print $NF}' | tail -n +2`"
 			echo
 		fi
 	done
