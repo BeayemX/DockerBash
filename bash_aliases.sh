@@ -23,57 +23,37 @@ function tmux-resume()
 }
 
 # Duplicate of PackageManagement.sh
-alias find-package='_find'
-alias update='_update'
-alias install='_install'
+if hash apt 2>/dev/null; then
+	alias update='sudo apt update && sudo apt upgrade'
+	alias install='sudo apt install'
+	#alias find-package='apt list'
+	#alias find-package='apt search -F "%c %p %d %V"'
+	alias find-package='apt search'
+	alias uninstall='sudo apt remove'
+	alias autoremove='sudo apt autoremove'
 
-function _update()
-{
-	if hash apt 2>/dev/null; then
-		apt update && apt upgrade;
-	elif hash dnf 2>/dev/null; then
-		dnf update;
-	elif hash pacman 2>/dev/null; then
-		pacman -Syu;
-	elif hash apk 2>/dev/null; then
-		apk update;
-	else
-		echo PackageManager not detected.
-	fi
-}
+elif hash dnf 2>/dev/null; then
+	alias update='sudo dnf update'
+	alias install='sudo dnf install'
+	alias find-package='dnf search'
+	#alias uninstall=''
 
-function _install()
-{
-	if hash apt 2>/dev/null; then
-		apt install $@;
-	elif hash dnf 2>/dev/null; then
-		dnf install $@;
-	elif hash pacman 2>/dev/null; then
-		pacman -Sy $@;
-	elif hash apk 2>/dev/null; then
-		apk add $@;
-	else
-		echo PackageManager not detected.
-	fi
-}
+elif hash pacman 2>/dev/null; then
+	alias update='sudo pacman -Syu'
+	alias install='sudo pacman -Sy'
+	alias find-package='pacman -Ss'
+	#alias uninstall=''
+	alias cleanup-arch='sudo pacman -Sc'
 
-function _find()
-{
-	if hash apt-cache 2>/dev/null; then
-		apt search $@;
-		# apt list $@;
-	elif hash dnf 2>/dev/null; then
-		dnf search $@;
-		# dnf list $@;
-	elif hash pacman 2>/dev/null; then
-		pacman -Ss $@;
-	elif hash apk 2>/dev/null; then
-		apk search "$@";
-		# apk search -v -d "$@"; # Also search description
-	else
-		echo PackageManager not detected.
-	fi
-}
+elif hash apk 2>/dev/null; then
+	alias update='sudo apk update'
+	alias install='sudo apk add'
+	alias find-package='apk search'
+	#alias uninstall=''
+else
+	echo PackageManager not detected.
+fi
+
 
 # Execute for every new bash
 echo
