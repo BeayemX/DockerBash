@@ -1,25 +1,30 @@
-export DEFAULT_CONTAINER_NAME='docker-bash'
+# Project paths
 export DOCKERBASH_PATH="$HOME/DockerBash/"
-export DOCKERBASH_ALIASES="$DOCKERBASH_PATH/bash_aliases.sh"
 export DISTRO_IMAGES=(`ls ${DOCKERBASH_PATH}/distributions/`)
+export DOCKERBASH_ALIASES="$DOCKERBASH_PATH/bash_aliases.sh"
 
 
+# Configuration
+export DEFAULT_CONTAINER_NAME='docker-bash'
+
+
+# Setup
 if hash podman 2>/dev/null; then
 	export DOCKERBASH_PROGRAM='podman'
 elif hash docker 2>/dev/null; then
 	export DOCKERBASH_PROGRAM='docker'
 else
 	echo There is not containerization software installed!;
-	exit 1
 fi
+
 
 # Autocompletion
 source $DOCKERBASH_PATH/docker-bash-completion.bash
 
+
 # Usage
 alias db='_docker-bash-magic'
-#--mount type=bind,source=~/system-backup/Scripts/DockerBash/bash_aliases.sh,target=/root/.bash_aliases \
-alias db-tmp='_select_distro && CONTAINER_NAME="tmp-shell" _db_run_template --rm $IMAGE_NAME'
+alias db-tmp='_select_distro && _db_pre_start && CONTAINER_NAME="tmp-shell" _db_run_template --rm $IMAGE_NAME'
 alias db-delete='_docker-bash-delete-container'
 
 # Setup
@@ -39,11 +44,6 @@ alias db-ls-names='db-list-names-only'
 
 alias db-rm='db-delete'
 
-# Private Methods
-alias _db-init='_db_run_template $IMAGE_NAME'
-alias _db-start="$DOCKERBASH_PROGRAM start $CONTAINER_NAME > /dev/null 2>&1"  # Starts a not-running container
-alias _db-continue="$DOCKERBASH_PROGRAM exec -it $CONTAINER_NAME bash"  # Allows connecting multiple times at the same time; Using `docker exec -it` is necessary because `docker start -i` would share the shell/inputs with _db-start!
-alias _db-stop="$DOCKERBASH_PROGRAM stop $CONTAINER_NAME > /dev/null 2>&1"
 
 # Creates a non-existing container
 function _select_distro() {
@@ -65,10 +65,6 @@ function _select_distro() {
 }
 
 function _db_run_template() {
-	#echo _db_run_template
-	#echo $CONTAINER_NAME
-	#echo $IMAGE_NAME
-
 	# Use this variable to create the command step by step
 	local cmd="$DOCKERBASH_PROGRAM run -it --hostname=$CONTAINER_NAME --name=$CONTAINER_NAME --net=host "
 
@@ -99,15 +95,21 @@ function _db_run_template() {
 	${cmd};  # Execute the command
 }
 
-function _docker-bash-magic() {
+function _db_pre_start() {
+	clear
 
-    export CONTAINER_NAME=${1:-$DEFAULT_CONTAINER_NAME}
-	echo "Using docker-bash '$CONTAINER_NAME'";
 	#echo
 	#echo "**Instructions**"
 	#echo "To use x11 apps you have to execute 'xhost +' on the host";
 	#echo
 	#echo
+
+	echo "Using docker-bash '$CONTAINER_NAME'";
+}
+
+function _docker-bash-magic() {
+
+    export CONTAINER_NAME=${1:-$DEFAULT_CONTAINER_NAME}
 
 	mkdir "/tmp/DockerBash/$CONTAINER_NAME" -p
 
@@ -116,25 +118,22 @@ function _docker-bash-magic() {
 	if [ $? -eq 1 ]; then
 		echo "Initializing docker container for the first time.";
 		_select_distro;
-		_db-init;
+		_db_pre_start;
+		_db_run_template $IMAGE_NAME;
 	else
 		running=`$DOCKERBASH_PROGRAM inspect -f "{{.State.Running}}" $CONTAINER_NAME`;
 
 		if [ "$running" != "true" ]; then
-			# echo "Starting container.";
-			_db-start;
+			$DOCKERBASH_PROGRAM start $CONTAINER_NAME > /dev/null 2>&1  # Starts a not-running container
 		fi
 
-		_db-continue;
+		_db_pre_start
+		$DOCKERBASH_PROGRAM exec -it $CONTAINER_NAME bash  # Allows connecting multiple times at the same time; Using `docker exec -it` is necessary because `docker start -i` would share the shell/inputs with _db-start!
 	fi
 }
 
 function _docker-bash-delete-container() {
-	if [ $# -eq 1 ]; then
-		export CONTAINER_NAME=$1
-	else
-		export CONTAINER_NAME=$DEFAULT_CONTAINER_NAME
-	fi
+	export CONTAINER_NAME=${1:-$DEFAULT_CONTAINER_NAME}
 
 	# Ask for user confirmation
 	echo
@@ -143,7 +142,7 @@ function _docker-bash-delete-container() {
 
 	if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
 		# Delete container
-		_db-stop;
+		$DOCKERBASH_PROGRAM stop $CONTAINER_NAME > /dev/null 2>&1
 		$DOCKERBASH_PROGRAM rm $CONTAINER_NAME > /dev/null 2>&1
 		echo "Docker-bash container '$CONTAINER_NAME' has been deleted."
 	fi
