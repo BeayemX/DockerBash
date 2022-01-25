@@ -66,9 +66,6 @@ function _select_distro() {
 }
 
 function _db_run_template() {
-
-	echo TEMP
-	echo $CONTAINER_NAME
 	# Use this variable to create the command step by step
 	local cmd="$DOCKERBASH_PROGRAM run -it --hostname=$CONTAINER_NAME --name=$CONTAINER_NAME --net=host "
 
