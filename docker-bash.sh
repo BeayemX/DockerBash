@@ -30,19 +30,36 @@ alias db-ls-names='db-list-names-only'
 alias db-rm='db-delete'
 
 # Private Methods
-alias _db_run_template='docker run -it \
-	--hostname=$CONTAINER_NAME \
-	--name=$CONTAINER_NAME \
-	--net=host \
-	--volume=$HOME:/host \
-	--volume=$DOCKERBASH_ALIASES:/root/.bash_aliases \
-	--volume=$HOME/.inputrc:/root/.inputrc \
-	--volume=$HOME/.tmux.conf:/root/.tmux.conf \
-	--volume=$HOME/.vimrc:/root/.vimrc \
-	\
-	--env DISPLAY \
-	--volume=/tmp/.X11-unix:/tmp/.X11-unix \
-	'
+function _db_run_template() {
+	# Use this variable to create the command step by step
+	local cmd="docker run -it --hostname=$CONTAINER_NAME --name=$CONTAINER_NAME --net=host "
+
+	cmd="$cmd --volume=$HOME:/host"
+	cmd="$cmd --volume=$DOCKERBASH_ALIASES:/root/.bash_aliases"
+
+	# Use certain dot-files from the host sytem
+	if [ -f $HOME/.inputrc ]; then
+		cmd="$cmd --volume=$HOME/.inputrc:/root/.inputrc"
+	fi
+
+	if [ -f $HOME/.tmux.conf ]; then
+		cmd="$cmd --volume=$HOME/.tmux.conf:/root/.tmux.conf"
+	fi
+
+	if [ -f $HOME/.vimrc ]; then
+		cmd="$cmd --volume=$HOME/.vimrc:/root/.vimrc"
+	fi
+
+	# Enable support for UI applicaitons
+	cmd="$cmd --env DISPLAY"
+	cmd="$cmd --volume=/tmp/.X11-unix:/tmp/.X11-unix"
+
+
+	# Add all arguments to the command
+	cmd="$cmd $@"
+
+	${cmd};  # Execute the command
+}
 
 alias _db-init='_db_run_template $IMAGE_NAME'
 alias _db-start='docker start $CONTAINER_NAME > /dev/null 2>&1'  # Starts a not-running container
