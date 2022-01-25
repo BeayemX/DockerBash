@@ -6,6 +6,7 @@ export DOCKERBASH_ALIASES="$DOCKERBASH_PATH/bash_aliases.sh"
 
 # Configuration
 export DEFAULT_CONTAINER_NAME='docker-bash'
+export DEFAULT_CONTAINER_NAME_TMP='tmp-shell'
 
 
 # Setup
@@ -24,7 +25,7 @@ source $DOCKERBASH_PATH/docker-bash-completion.bash
 
 # Usage
 alias db='_docker-bash-magic'
-alias db-tmp='_select_distro && _db_pre_start && CONTAINER_NAME="tmp-shell" _db_run_template --rm $IMAGE_NAME'
+alias db-tmp='_db-tmp'
 alias db-delete='_docker-bash-delete-container'
 
 # Setup
@@ -65,6 +66,9 @@ function _select_distro() {
 }
 
 function _db_run_template() {
+
+	echo TEMP
+	echo $CONTAINER_NAME
 	# Use this variable to create the command step by step
 	local cmd="$DOCKERBASH_PROGRAM run -it --hostname=$CONTAINER_NAME --name=$CONTAINER_NAME --net=host "
 
@@ -130,6 +134,14 @@ function _docker-bash-magic() {
 		_db_pre_start
 		$DOCKERBASH_PROGRAM exec -it $CONTAINER_NAME bash  # Allows connecting multiple times at the same time; Using `docker exec -it` is necessary because `docker start -i` would share the shell/inputs with _db-start!
 	fi
+}
+
+function _db-tmp(){
+	_select_distro
+	export CONTAINER_NAME=${1:-$DEFAULT_CONTAINER_NAME_TMP}
+
+	_db_pre_start
+	_db_run_template --rm $IMAGE_NAME
 }
 
 function _docker-bash-delete-container() {
