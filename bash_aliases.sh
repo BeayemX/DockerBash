@@ -58,3 +58,4 @@ fi
 # Execute for every new bash
 echo
 neofetch
+PS1="[ > ] $PS1"
