@@ -1,5 +1,5 @@
 # Project paths
-export DOCKERBASH_PATH="$HOME/DockerBash/"
+export DOCKERBASH_PATH="$( builtin cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export DISTRO_IMAGES=(`ls ${DOCKERBASH_PATH}/distributions/`)
 export DOCKERBASH_ALIASES="$DOCKERBASH_PATH/bash_aliases.sh"
 
