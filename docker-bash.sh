@@ -91,13 +91,14 @@ function _db_run_template() {
 
 
 	# Add all arguments to the command
+	#echo $cmd
 	cmd="$cmd $@"
 
 	${cmd};  # Execute the command
 }
 
 function _db_pre_start() {
-	clear
+	#clear
 
 	#echo
 	#echo "**Instructions**"
@@ -115,15 +116,17 @@ function _docker-bash-magic() {
 	mkdir "/tmp/DockerBash/$CONTAINER_NAME" -p
 
 	$DOCKERBASH_PROGRAM inspect -f "{{.State.Running}}" $CONTAINER_NAME > /dev/null 2>&1;
+	local exists=$?  # Docker: 0=existing 1=non-existing # Podman: 125=non-existing
+	#echo "exists: $exists"
 
-	if [ $? -eq 1 ]; then
+	if [ $exists -ne 0 ]; then
 		echo "Initializing docker container for the first time.";
 		_select_distro;
 		_db_pre_start;
 		_db_run_template $IMAGE_NAME;
 	else
 		running=`$DOCKERBASH_PROGRAM inspect -f "{{.State.Running}}" $CONTAINER_NAME`;
-
+		#echo "running: $running"  # bool
 		if [ "$running" != "true" ]; then
 			$DOCKERBASH_PROGRAM start $CONTAINER_NAME > /dev/null 2>&1  # Starts a not-running container
 		fi
