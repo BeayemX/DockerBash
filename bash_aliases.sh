@@ -24,30 +24,30 @@ function tmux-resume()
 
 # Duplicate of PackageManagement.sh
 if hash apt 2>/dev/null; then
-	alias update='sudo apt update && sudo apt upgrade'
-	alias install='sudo apt install'
+	alias update='apt update && apt upgrade'
+	alias install='apt install'
 	#alias find-package='apt list'
 	#alias find-package='apt search -F "%c %p %d %V"'
 	alias find-package='apt search'
-	alias uninstall='sudo apt remove'
-	alias autoremove='sudo apt autoremove'
+	alias uninstall='apt remove'
+	alias autoremove='apt autoremove'
 
 elif hash dnf 2>/dev/null; then
-	alias update='sudo dnf update'
-	alias install='sudo dnf install'
+	alias update='dnf update'
+	alias install='dnf install'
 	alias find-package='dnf search'
 	#alias uninstall=''
 
 elif hash pacman 2>/dev/null; then
-	alias update='sudo pacman -Syu'
-	alias install='sudo pacman -Sy'
+	alias update='pacman -Syu'
+	alias install='pacman -Sy'
 	alias find-package='pacman -Ss'
 	#alias uninstall=''
-	alias cleanup-arch='sudo pacman -Sc'
+	alias cleanup-arch='pacman -Sc'
 
 elif hash apk 2>/dev/null; then
-	alias update='sudo apk update'
-	alias install='sudo apk add'
+	alias update='apk update'
+	alias install='apk add'
 	alias find-package='apk search'
 	#alias uninstall=''
 else
