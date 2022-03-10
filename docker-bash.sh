@@ -117,7 +117,6 @@ function _docker-bash-magic() {
 
 	$DOCKERBASH_PROGRAM inspect -f "{{.State.Running}}" $CONTAINER_NAME > /dev/null 2>&1;
 	local exists=$?  # Docker: 0=existing 1=non-existing # Podman: 125=non-existing
-	#echo "exists: $exists"
 
 	if [ $exists -ne 0 ]; then
 		echo "Initializing docker container for the first time.";
@@ -126,7 +125,7 @@ function _docker-bash-magic() {
 		_db_run_template $IMAGE_NAME;
 	else
 		running=`$DOCKERBASH_PROGRAM inspect -f "{{.State.Running}}" $CONTAINER_NAME`;
-		#echo "running: $running"  # bool
+
 		if [ "$running" != "true" ]; then
 			$DOCKERBASH_PROGRAM start $CONTAINER_NAME > /dev/null 2>&1  # Starts a not-running container
 		fi
@@ -163,18 +162,33 @@ function _docker-bash-delete-container() {
 function _docker-bash-list-container-names-only() {
 	for IMAGE in "${DISTRO_IMAGES[@]}"
 	do
-		$DOCKERBASH_PROGRAM container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | awk 'NF>1{print $NF}' | tail -n +2
+		if [ $DOCKERBASH_PROGRAM = "docker" ]; then
+			$DOCKERBASH_PROGRAM container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | awk 'NF>1{print $NF}' | tail -n +2
+		elif [ $DOCKERBASH_PROGRAM = "podman" ]; then
+			$DOCKERBASH_PROGRAM container ls --all --filter ancestor="localhost/$DEFAULT_CONTAINER_NAME-$IMAGE:latest" | awk 'NF>1{print $NF}' | tail -n +2
+		fi
 	done
 }
 
 function _db_list() {
 	for IMAGE in "${DISTRO_IMAGES[@]}"
 	do
-		local num_lines=$($DOCKERBASH_PROGRAM container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | wc -l)
+		local num_lines;
+		if [ $DOCKERBASH_PROGRAM = "docker" ]; then
+			num_lines=$($DOCKERBASH_PROGRAM container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | wc -l)
+		elif [ $DOCKERBASH_PROGRAM = "podman" ]; then
+			num_lines=$($DOCKERBASH_PROGRAM container ls --all --filter ancestor="localhost/$DEFAULT_CONTAINER_NAME-$IMAGE:latest" | wc -l)
+		fi
+
 		if [ $num_lines -gt 1 ]; then
 			echo "      $IMAGE      "
-			#$DOCKERBASH_PROGRAM container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | awk 'NF>1{print $NF}' | tail -n +2
-			echo "`$DOCKERBASH_PROGRAM container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | awk 'NF>1{print $NF}' | tail -n +2`"
+
+			if [ $DOCKERBASH_PROGRAM = "docker" ]; then
+				echo "`$DOCKERBASH_PROGRAM container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | awk 'NF>1{print $NF}' | tail -n +2`"
+			elif [ $DOCKERBASH_PROGRAM = "podman" ]; then
+				echo "`$DOCKERBASH_PROGRAM container ls --all --filter ancestor="localhost/$DEFAULT_CONTAINER_NAME-$IMAGE:latest" | awk 'NF>1{print $NF}' | tail -n +2`"
+			fi
+
 			echo
 		fi
 	done
@@ -186,7 +200,13 @@ function _db_list_verbose() {
 	for IMAGE in "${DISTRO_IMAGES[@]}"
 	do
 		echo "$IMAGE";
-		$DOCKERBASH_PROGRAM container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE";
+
+		if [ $DOCKERBASH_PROGRAM = "docker" ]; then
+			$DOCKERBASH_PROGRAM container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE";
+		elif [ $DOCKERBASH_PROGRAM = "podman" ]; then
+			$DOCKERBASH_PROGRAM container ls --all --filter ancestor="localhost/$DEFAULT_CONTAINER_NAME-$IMAGE:latest";
+		fi
+
 		echo;
 	done
 }
