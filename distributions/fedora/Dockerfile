@@ -1,4 +1,4 @@
-FROM fedora:32
+FROM fedora:latest
 
 RUN dnf update -y
 RUN dnf install -y htop tmux neofetch vim
