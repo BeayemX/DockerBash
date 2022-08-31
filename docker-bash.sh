@@ -184,9 +184,9 @@ function _db_list() {
 			echo "$IMAGE"
 
 			if [ $DOCKERBASH_PROGRAM = "docker" ]; then
-				echo "`$DOCKERBASH_PROGRAM container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | awk 'NF>1{print "  " $NF}' | tail -n +2`"
+				echo "`$DOCKERBASH_PROGRAM container ls --all --filter ancestor="$DEFAULT_CONTAINER_NAME-$IMAGE" | awk 'NF>1{print " └─ " $NF}' | tail -n +2`"
 			elif [ $DOCKERBASH_PROGRAM = "podman" ]; then
-				echo "`$DOCKERBASH_PROGRAM container ls --all --filter ancestor="localhost/$DEFAULT_CONTAINER_NAME-$IMAGE:latest" | awk 'NF>1{print "  " $NF}' | tail -n +2`"
+				echo "`$DOCKERBASH_PROGRAM container ls --all --filter ancestor="localhost/$DEFAULT_CONTAINER_NAME-$IMAGE:latest" | awk 'NF>1{print " └─ " $NF}' | tail -n +2`"
 			fi
 
 			echo
