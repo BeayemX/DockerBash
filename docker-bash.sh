@@ -137,7 +137,8 @@ function _docker-bash-magic() {
 
 function _db-tmp(){
 	_select_distro
-	export CONTAINER_NAME=${1:-$DEFAULT_CONTAINER_NAME_TMP}
+	local suffix=`echo $RANDOM | md5sum | head -c 5`
+	export CONTAINER_NAME=${1:-$DEFAULT_CONTAINER_NAME_TMP}-${suffix}
 
 	_db_pre_start
 	_db_run_template --rm $IMAGE_NAME
@@ -223,3 +224,4 @@ function _rebuild_from_scratch()
 		unset DISTRO_SELECTED;
 	)
 }
+
